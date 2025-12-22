@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Emir‑Superman Supervisor UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Frontend UI für den Emir‑Superman Supervisor: Tasks erstellen, Agents steuern, Wissen verwalten."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div class="app-brand">
+          <span class="app-logo">🦸‍♂️</span>
+          <div>
+            <div class="app-title">Emir‑Superman Supervisor</div>
+            <div class="app-subtitle">Supervisor‑Core · Agents · Tasks · Knowledge</div>
+          </div>
+        </div>
+        <nav class="app-nav">
+          <a href="#section-status">Status</a>
+          <a href="#section-agents">Agents</a>
+          <a href="#section-guide">Guide</a>
+          <a href="#section-tasks">Tasks</a>
+          <a href="#section-knowledge">Knowledge</a>
+          <a href="#section-tools">Tools</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section id="section-status" class="card">
+        <div class="card-header">
+          <h2>Systemstatus</h2>
+          <button id="status-refresh" class="btn btn-secondary">Refresh</button>
+        </div>
+        <div class="card-body status-grid">
+          <div>
+            <h3>Health</h3>
+            <pre id="status-health" class="pre-block">–</pre>
+          </div>
+          <div>
+            <h3>Supervisor</h3>
+            <pre id="status-supervisor" class="pre-block">–</pre>
+          </div>
+          <div>
+            <h3>Queue / Cache / Vector</h3>
+            <pre id="status-subsystems" class="pre-block">–</pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-agents" class="card">
+        <div class="card-header">
+          <h2>Agents</h2>
+          <button id="agents-refresh" class="btn btn-secondary">Neu laden</button>
+        </div>
+        <div class="card-body">
+          <div id="agents-list" class="agents-grid"></div>
+        </div>
+      </section>
+
+      <section id="section-guide" class="card">
+        <div class="card-header">
+          <h2>Interaktiver Guide</h2>
+        </div>
+        <div class="card-body guide-layout">
+          <div class="guide-flows">
+            <h3>Use‑Cases</h3>
+            <p class="text-muted small">
+              Wähle eine Aufgabe aus. Der Guide zeigt dir konkrete Schritte im Terminal, in der API oder im UI.
+            </p>
+            <div id="guide-flow-list" class="guide-flow-list"></div>
+          </div>
+          <div class="guide-steps">
+            <div class="guide-step-header">
+              <div>
+                <div id="guide-step-flow-title" class="guide-step-flow-title">Kein Flow ausgewählt</div>
+                <div id="guide-step-index" class="guide-step-index"></div>
+              </div>
+              <div class="guide-step-nav">
+                <button id="guide-prev" class="btn btn-secondary btn-sm" type="button">Zurück</button>
+                <button id="guide-next" class="btn btn-primary btn-sm" type="button">Weiter</button>
+              </div>
+            </div>
+            <div class="guide-step-body">
+              <h3 id="guide-step-title">Bitte links einen Use‑Case auswählen.</h3>
+              <p id="guide-step-description" class="guide-step-description"></p>
+              <div id="guide-step-actions" class="guide-step-actions"></div>
+              <div id="guide-step-hints" class="guide-step-hints text-muted"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-tasks" class="card">
+        <div class="card-header">
+          <h2>Tasks & Orchestrierung</h2>
+        </div>
+        <div class="card-body tasks-layout">
+          <div class="tasks-col">
+            <h3>Neuen Task erstellen</h3>
+            <form id="task-form" class="form">
+              <label class="form-field">
+                <span>Agent‑Typ</span>
+                <select id="task-type" required>
+                  <option value="research">research – Recherche</option>
+                  <option value="analysis">analysis – Analyse</option>
+                  <option value="creative">creative – Texte & Copy</option>
+                  <option value="coding">coding – Code & Technik</option>
+                </select>
+              </label>
+
+              <label class="form-field">
+                <span>Priorität</span>
+                <select id="task-priority">
+                  <option value="medium">medium</option>
+                  <option value="high">high</option>
+                  <option value="low">low</option>
+                </select>
+              </label>
+
+              <label class="form-field">
+                <span>Inhalt / Auftrag</span>
+                <textarea
+                  id="task-content"
+                  rows="6"
+                  placeholder="Beschreibe hier, was der Agent tun soll (z.B. Sales‑Analyse, E‑Mail‑Entwurf, Code‑Review)..."
+                  required
+                ></textarea>
+              </label>
+
+              <fieldset class="form-inline-row">
+                <label class="form-checkbox">
+                  <input id="task-cache" type="checkbox" checked />
+                  <span>Antwort cachen (wenn möglich)</span>
+                </label>
+              </fieldset>
+
+              <button type="submit" class="btn btn-primary">Task starten</button>
+              <div id="task-form-message" class="form-message"></div>
+            </form>
+
+            <div class="task-current">
+              <h3>Aktueller Task</h3>
+              <div id="task-current-summary" class="pill-list"></div>
+            </div>
+          </div>
+
+          <div class="tasks-col">
+            <h3>Task überwachen</h3>
+            <div class="form-inline-row">
+              <input
+                id="task-id-input"
+                type="text"
+                class="input"
+                placeholder="Task‑ID einfügen oder aus aktueller Erstellung übernehmen"
+              />
+              <button id="task-load" class="btn btn-secondary">Task laden</button>
+            </div>
+            <div class="task-poll-info">
+              <label class="form-checkbox">
+                <input id="task-auto-poll" type="checkbox" checked />
+                <span>Auto‑Refresh (Polling)</span>
+              </label>
+              <span id="task-poll-status" class="text-muted"></span>
+            </div>
+            <div class="task-panels">
+              <div>
+                <h4>Details</h4>
+                <pre id="task-details-output" class="pre-block">–</pre>
+              </div>
+              <div>
+                <h4>Resultat</h4>
+                <pre id="task-result-output" class="pre-block">–</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-knowledge" class="card">
+        <div class="card-header">
+          <h2>Knowledge Base</h2>
+        </div>
+        <div class="card-body kb-layout">
+          <div class="kb-col">
+            <h3>Wissen speichern</h3>
+            <form id="kb-form" class="form">
+              <label class="form-field">
+                <span>Text</span>
+                <textarea
+                  id="kb-text"
+                  rows="4"
+                  placeholder="Relevantes Wissen einfügen (z.B. Produkt‑Infos, Prozesse, interne Guidelines)..."
+                  required
+                ></textarea>
+              </label>
+              <label class="form-field">
+                <span>Source</span>
+                <input
+                  id="kb-source"
+                  type="text"
+                  class="input"
+                  placeholder="z.B. 'manual', 'crm', 'sales‑call‑01'"
+                />
+              </label>
+              <button type="submit" class="btn btn-primary">Speichern</button>
+              <div id="kb-form-message" class="form-message"></div>
+            </form>
+          </div>
+          <div class="kb-col">
+            <h3>Wissen durchsuchen</h3>
+            <form id="kb-search-form" class="form-inline-row">
+              <input
+                id="kb-query"
+                type="text"
+                class="input"
+                placeholder="Suchbegriff (z.B. 'Hauptstadt', 'KI‑Vertrieb')"
+                required
+              />
+              <button type="submit" class="btn btn-secondary">Suchen</button>
+            </form>
+            <div id="kb-search-meta" class="text-muted"></div>
+            <div id="kb-search-results" class="kb-results"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-tools" class="card">
+        <div class="card-header">
+          <h2>Tools & Live‑Infos</h2>
+        </div>
+        <div class="card-body tools-grid">
+          <div>
+            <h3>Queue‑Stats</h3>
+            <button id="queue-refresh" class="btn btn-secondary btn-sm">Refresh</button>
+            <pre id="queue-stats-output" class="pre-block pre-small">–</pre>
+          </div>
+          <div>
+            <h3>Cache‑Stats</h3>
+            <div class="form-inline-row">
+              <button id="cache-stats-refresh" class="btn btn-secondary btn-sm">Stats</button>
+              <button id="cache-invalidate-btn" class="btn btn-danger btn-sm">Cache leeren</button>
+            </div>
+            <pre id="cache-stats-output" class="pre-block pre-small">–</pre>
+          </div>
+          <div>
+            <h3>Kosten‑Report</h3>
+            <button id="costs-refresh" class="btn btn-secondary btn-sm">Refresh</button>
+            <pre id="costs-output" class="pre-block pre-small">–</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="app-toast" class="toast toast-hidden"></div>
+
+    <footer class="app-footer">
+      <span>Emir‑Superman Supervisor UI</span>
+      <span class="text-muted">Backend: /api/v1 · ohne echte LLM‑Keys lauffähig (Stubs)</span>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

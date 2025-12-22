@@ -1,0 +1,42 @@
+{
+  "name": "gpt_supermanv1",
+  "version": "1.0.0",
+  "description": "Emir-Superman Supervisor: Supervisor-Core, Agents, Queue, SQLite, Knowledge, Frontend-UI.",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "NODE_ENV=development node server/index.js",
+    "start": "NODE_ENV=production node server/index.js",
+    "test": "NODE_ENV=test jest"
+  },
+  "keywords": [
+    "supervisor",
+    "agents",
+    "queue",
+    "sqlite",
+    "knowledge",
+    "emir-superman"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.0.0",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "node-cache": "^5.1.2",
+    "better-sqlite3": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  }
+}
