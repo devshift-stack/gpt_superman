@@ -7,6 +7,8 @@ const path = require("path");
 const { createHealthRouter } = require("./routes/health");
 const { createSupervisorRouter } = require("./routes/supervisor");
 const { createAgentsRouter } = require("./routes/agents");
+const { createAuthRouter } = require("./routes/auth");
+const { authMiddleware, optionalAuth } = require("./middleware/auth");
 
 function createApp({ supervisor }) {
   const app = express();
@@ -35,6 +37,7 @@ function createApp({ supervisor }) {
   app.use(express.json({ limit: "2mb" }));
   app.use(morgan("combined"));
 
+  // Global rate limiting (before auth)
   const maxReq = Number(process.env.RATE_LIMIT || 200);
   app.use(
     rateLimit({
@@ -45,16 +48,36 @@ function createApp({ supervisor }) {
     })
   );
 
+  // Health endpoint (no auth required)
   app.use("/health", createHealthRouter());
 
   const apiVersion = (process.env.API_VERSION || "v1").toString();
-  app.use(`/api/${apiVersion}`, createSupervisorRouter({ supervisor }));
-  app.use(`/api/${apiVersion}`, createAgentsRouter());
+  const apiBase = `/api/${apiVersion}`;
 
+  // Auth routes (login, keys management)
+  app.use(`${apiBase}/auth`, createAuthRouter());
+
+  // Check if auth is required (default: optional for backwards compatibility)
+  const requireAuth = process.env.REQUIRE_AUTH === "true";
+
+  if (requireAuth) {
+    // All API routes require authentication
+    app.use(apiBase, authMiddleware());
+  } else {
+    // Optional auth - adds req.auth if token provided, but doesn't block
+    app.use(apiBase, optionalAuth());
+  }
+
+  // API routes
+  app.use(apiBase, createSupervisorRouter({ supervisor }));
+  app.use(apiBase, createAgentsRouter());
+
+  // 404 handler
   app.use((_req, res) => {
     res.status(404).json({ error: "NOT_FOUND" });
   });
 
+  // Error handler
   app.use((err, _req, res, _next) => {
     console.error("[api_error]", err);
     res.status(500).json({ error: "INTERNAL_ERROR", message: err.message || "Internal error" });
