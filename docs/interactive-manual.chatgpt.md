@@ -1,4 +1,4 @@
-# Interaktive Betriebsanleitung – MUCI-SUPERMAN v2.0
+# Interaktive Betriebsanleitung – MUCI-SUPERMAN v2.1
 
 Diese Datei kannst du komplett in eine neue ChatGPT-Konversation kopieren.
 Bitte ChatGPT dann, dich **Schritt für Schritt** durch das System zu führen.
@@ -7,9 +7,9 @@ Bitte ChatGPT dann, dich **Schritt für Schritt** durch das System zu führen.
 
 ## Systemüberblick
 
-**MUCI-SUPERMAN v2.0** ist ein AI-Supervisor-Service mit:
+**MUCI-SUPERMAN v2.1** ist ein AI-Supervisor-Service mit:
 
-- **7 OOP Agents v2.1**: Translator, Support, Marketing, Data, Finance, Legal, Summary
+- **8 OOP Agents v2.1**: Translator, Support, Marketing, Data, Finance, Legal, Summary, Influencer
 - **External Services v2.0**: Sipgate (Telefonie), Twilio (SMS/WhatsApp), Voice (STT/TTS), Meta Graph (Social Media)
 - **ArenaProPlus**: Multi-Agent Collaboration für komplexe Aufgaben
 - **TaskRouter**: Intelligente automatische Agent-Auswahl
@@ -22,7 +22,7 @@ Bitte ChatGPT dann, dich **Schritt für Schritt** durch das System zu führen.
 
 ---
 
-## Die 7 Agents (v2.1)
+## Die 8 Agents (v2.1)
 
 | Agent | Typ | Spezialisierung | Besondere Features |
 |-------|-----|-----------------|-------------------|
@@ -33,6 +33,7 @@ Bitte ChatGPT dann, dich **Schritt für Schritt** durch das System zu führen.
 | **FinanceAgent** | `finance` | Finanzen | Multi-Währung (EUR, BAM, RSD, CHF), Steuerberechnung |
 | **LegalAgent** | `legal` | Recht | Multi-Jurisdiktion (DE, AT, CH, BA, RS, HR) |
 | **SummaryAgent** | `summary` | Zusammenfassungen | Multi-Style (Executive, Bullets, Academic) |
+| **InfluencerAgent** | `influencer` | Social Media | Profil-Analyse, Content-Generierung, Hashtag-Optimierung, Auto-Posting |
 
 ---
 
@@ -117,8 +118,8 @@ curl http://localhost:3000/api/v1/agents \
 
 Kopiere diesen Text in ChatGPT:
 
-> Du bist mein Operator-Guide für MUCI-SUPERMAN v2.0.
-> Das System hat 7 Agents (Translator, Support, Marketing, Data, Finance, Legal, Summary), ArenaProPlus für Multi-Agent-Tasks, Auto-Routing und externe Services (Sipgate, Twilio, Voice, Meta).
+> Du bist mein Operator-Guide für MUCI-SUPERMAN v2.1.
+> Das System hat 8 Agents (Translator, Support, Marketing, Data, Finance, Legal, Summary, Influencer), ArenaProPlus für Multi-Agent-Tasks, Auto-Routing und externe Services (Sipgate, Twilio, Voice, Meta).
 >
 > Führe mich Schritt für Schritt durch:
 > 1. System starten und Status prüfen
@@ -127,8 +128,9 @@ Kopiere diesen Text in ChatGPT:
 > 4. Arena Pro+ testen (Multi-Agent Collaboration)
 > 5. Translator-Agent: Übersetzung mit Confidence Score
 > 6. Finance-Agent: Steuerberechnung
-> 7. Voice-Service: Text-to-Speech testen
-> 8. Services-Status prüfen
+> 7. Influencer-Agent: Social Media Content generieren
+> 8. Voice-Service: Text-to-Speech testen
+> 9. Services-Status prüfen
 >
 > Gib mir konkrete Kommandos (curl, Terminal, UI) und warte nach jedem Schritt auf meine Rückmeldung.
 
@@ -550,6 +552,61 @@ curl -X POST http://localhost:3000/api/v1/agents/summary/execute \
   -d '{"message": "Fasse zusammen (Executive Style): [langer Text]"}'
 ```
 
+### InfluencerAgent
+
+**Features:**
+- Profil-Analyse (Instagram & Facebook via Meta Graph API)
+- Content-Generierung mit KI (Captions, Bilder)
+- Hashtag-Optimierung (Top 15 basierend auf Analysen)
+- Auto-Posting auf Instagram und Facebook
+- Scheduling zu optimalen Zeiten
+- Style Learning von erfolgreichen Profilen
+
+**Unterstützte Plattformen:**
+- Instagram (Business/Creator Account)
+- Facebook (Page)
+
+**Aktionen:**
+- `analyze_profile`: Profil analysieren
+- `generate_content`: Content generieren
+- `generate_caption`: Caption erstellen
+- `generate_hashtags`: Hashtags generieren
+- `post_content`: Content veröffentlichen
+- `schedule_post`: Post planen
+
+```bash
+# Profil analysieren
+curl -X POST http://localhost:3000/api/v1/agents/influencer/execute \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Analysiere Instagram-Profil @beispiel_influencer"}'
+
+# Content generieren
+curl -X POST http://localhost:3000/api/v1/agents/influencer/execute \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Generiere Instagram Post über Fitness mit Hashtags"}'
+
+# Caption erstellen
+curl -X POST http://localhost:3000/api/v1/agents/influencer/execute \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Erstelle Caption für Reise-Foto in Paris"}'
+
+# Hashtags generieren
+curl -X POST http://localhost:3000/api/v1/agents/influencer/execute \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Generiere Hashtags für Food-Content"}'
+```
+
+**Umgebungsvariablen für Influencer Agent:**
+```env
+META_ACCESS_TOKEN=EAAxxxxxxx...
+INSTAGRAM_ACCOUNT_ID=17841400000000000
+FACEBOOK_PAGE_ID=100000000000000
+```
+
 ---
 
 ## Troubleshooting
@@ -627,7 +684,7 @@ curl "http://localhost:3000/api/v1/tasks?status=queued" \
           ┌───────────────┼───────────────┐
           ▼               ▼               ▼
 ┌─────────────────┐ ┌───────────┐ ┌─────────────────┐
-│   7 AI Agents   │ │ External  │ │   Persistence   │
+│   8 AI Agents   │ │ External  │ │   Persistence   │
 ├─────────────────┤ │ Services  │ ├─────────────────┤
 │ Translator      │ ├───────────┤ │ SQLite DB       │
 │ Support         │ │ Sipgate   │ │ InMemory Queue  │
@@ -636,6 +693,7 @@ curl "http://localhost:3000/api/v1/tasks?status=queued" \
 │ Finance         │ │ Meta      │ └─────────────────┘
 │ Legal           │ └───────────┘
 │ Summary         │
+│ Influencer      │
 └─────────────────┘
 ```
 
@@ -677,9 +735,11 @@ TWILIO_PHONE_NUMBER=+1234567890
 # Voice (ElevenLabs)
 ELEVENLABS_API_KEY=xxxx
 
-# Meta Graph
+# Meta Graph / Influencer Agent
 META_ACCESS_TOKEN=xxxx
 META_PAGE_ID=xxxx
+INSTAGRAM_ACCOUNT_ID=xxxx
+FACEBOOK_PAGE_ID=xxxx
 ```
 
 ---
@@ -710,5 +770,5 @@ curl -X POST http://91.98.78.198:3000/api/v1/auth/login \
 
 ---
 
-*Version: 2.0.0*
+*Version: 2.1.0*
 *Aktualisiert: 2025-12-23*
