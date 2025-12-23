@@ -63,7 +63,8 @@ class FinanceAgent extends BaseAgent {
       keywords: [
         'rechnung', 'invoice', 'faktura', 'steuer', 'tax', 'mwst', 'pdv',
         'buchhaltung', 'accounting', 'budget', 'ausgaben', 'expenses',
-        'zahlung', 'payment', 'bilanz', 'balance', 'euro', 'km', 'rsd'
+        'zahlung', 'payment', 'bilanz', 'balance', 'euro', 'km', 'rsd',
+        'napravi', 'račun', 'porez', 'cijena', 'bosni', 'srbiji', 'marka'
       ],
       costs: { input: 3, output: 15 },
       feedback: { enabled: true, minSamples: 5 }
