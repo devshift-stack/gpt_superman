@@ -6,6 +6,7 @@ const rateLimit = require("express-rate-limit");
 const path = require("path");
 const { createHealthRouter } = require("./routes/health");
 const { createSupervisorRouter } = require("./routes/supervisor");
+const { createAgentsRouter } = require("./routes/agents");
 
 function createApp({ supervisor }) {
   const app = express();
@@ -48,6 +49,7 @@ function createApp({ supervisor }) {
 
   const apiVersion = (process.env.API_VERSION || "v1").toString();
   app.use(`/api/${apiVersion}`, createSupervisorRouter({ supervisor }));
+  app.use(`/api/${apiVersion}`, createAgentsRouter());
 
   app.use((_req, res) => {
     res.status(404).json({ error: "NOT_FOUND" });
