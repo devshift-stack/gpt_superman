@@ -18,7 +18,10 @@ class InfluencerAgent extends BaseAgent {
       id: 'influencer',
       name: 'Influencer Agent',
       type: 'influencer',
+      version: '2.1.0',
       description: 'Social Media Content-Generierung, Profil-Analyse und Auto-Posting',
+      primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+      fallback: { provider: 'openai', model: 'gpt-4o' },
       capabilities: [
         'profile_analysis',
         'content_generation',
@@ -27,6 +30,13 @@ class InfluencerAgent extends BaseAgent {
         'scheduling',
         'style_learning'
       ],
+      keywords: [
+        'influencer', 'instagram', 'facebook', 'social media', 'content', 'hashtag',
+        'posting', 'caption', 'profil', 'analyse', 'follower', 'engagement',
+        'reels', 'stories', 'feed', 'insta', 'fb', 'post', 'schedule'
+      ],
+      costs: { input: 3, output: 15 },
+      feedback: { enabled: true, minSamples: 5 },
       ...config
     });
 
@@ -537,6 +547,29 @@ Gib praktische, umsetzbare Tipps. Antworte auf ${options.language === 'en' ? 'En
       type: 'advice',
       topics: this.detectThemes(content)
     };
+  }
+
+  // ============================================================================
+  // AI CALL METHOD
+  // ============================================================================
+
+  /**
+   * Ruft die KI mit einem Prompt auf
+   */
+  async callAI(prompt) {
+    const formattedPrompt = {
+      system: 'Du bist ein Social Media Experte und Influencer-Coach mit Expertise in Instagram und Facebook Marketing.',
+      user: prompt
+    };
+
+    // Primary Provider verwenden
+    const result = await this._callProvider(
+      this.primary || { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+      formattedPrompt,
+      null
+    );
+
+    return result;
   }
 
   // ============================================================================
