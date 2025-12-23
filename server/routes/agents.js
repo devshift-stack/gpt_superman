@@ -10,7 +10,8 @@ const {
   DataAgent,
   FinanceAgent,
   LegalAgent,
-  SummaryAgent
+  SummaryAgent,
+  InfluencerAgent
 } = require('../agents');
 const ArenaProPlus = require('../../supervisor/ArenaProPlus');
 const TaskRouter = require('../../supervisor/TaskRouter');
@@ -101,6 +102,18 @@ const AGENT_CONFIGS = {
     fallback: { provider: 'openai', model: 'gpt-4o' },
     settings: { timeout: 60000 },
     costs: { input: 3.00, output: 15.00 }
+  },
+  influencer: {
+    id: 'influencer',
+    name: 'Influencer Agent',
+    type: 'influencer',
+    description: 'Social Media Content-Generierung, Profil-Analyse und Auto-Posting für Instagram & Facebook.',
+    capabilities: ['profile_analysis', 'content_generation', 'hashtag_optimization', 'auto_posting', 'scheduling', 'style_learning'],
+    keywords: ['influencer', 'social media', 'instagram', 'facebook', 'content', 'hashtag', 'profil', 'posting'],
+    primary: { provider: 'openai', model: 'gpt-4o' },
+    fallback: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+    settings: { timeout: 90000 },
+    costs: { input: 5.00, output: 15.00 }
   }
 };
 
@@ -122,7 +135,8 @@ async function initializeAgents() {
     data: DataAgent,
     finance: FinanceAgent,
     legal: LegalAgent,
-    summary: SummaryAgent
+    summary: SummaryAgent,
+    influencer: InfluencerAgent
   };
 
   for (const [type, config] of Object.entries(AGENT_CONFIGS)) {

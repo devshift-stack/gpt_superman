@@ -21,6 +21,7 @@ const TranslatorAgent = require('./TranslatorAgent');
 const LegalAgent = require('./LegalAgent');
 const SupportAgent = require('./SupportAgent');
 const MarketingAgent = require('./MarketingAgent');
+const InfluencerAgent = require('./InfluencerAgent');
 
 // Agent Registry
 const AGENTS = {
@@ -30,7 +31,8 @@ const AGENTS = {
   translator: TranslatorAgent,
   legal: LegalAgent,
   support: SupportAgent,
-  marketing: MarketingAgent
+  marketing: MarketingAgent,
+  influencer: InfluencerAgent
 };
 
 /**
@@ -126,6 +128,7 @@ module.exports = {
   LegalAgent,
   SupportAgent,
   MarketingAgent,
+  InfluencerAgent,
 
   // Registry
   AGENTS,

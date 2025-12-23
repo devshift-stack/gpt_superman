@@ -102,6 +102,19 @@ class TaskRouter {
         ],
         weight: 1.0,
       },
+      influencer: {
+        keywords: [
+          'influencer', 'social media', 'instagram', 'facebook', 'tiktok',
+          'content', 'post', 'caption', 'hashtag', 'hashtags',
+          'follower', 'followers', 'engagement', 'reichweite', 'reach',
+          'profil', 'profile', 'analyse', 'analyze', 'analysieren',
+          'generiere', 'generate', 'erstelle', 'create', 'posten', 'posting',
+          'scheduling', 'planen', 'schedule', 'veröffentlichen', 'publish',
+          'stil', 'style', 'lernen', 'learn', 'automatisch', 'auto',
+          'bild', 'image', 'foto', 'photo', 'story', 'stories', 'reel', 'reels',
+        ],
+        weight: 1.2,
+      },
     };
 
     // Type-to-Agent Mapping für v2.1
@@ -144,6 +157,14 @@ class TaskRouter {
       'summary': 'summary',
       'zusammenfassung': 'summary',
       'summarize': 'summary',
+      // Influencer
+      'influencer': 'influencer',
+      'social media': 'influencer',
+      'instagram': 'influencer',
+      'facebook': 'influencer',
+      'content': 'influencer',
+      'hashtag': 'influencer',
+      'posting': 'influencer',
     };
 
     // Routing Statistics
@@ -319,6 +340,7 @@ class TaskRouter {
       finance: 6000,
       legal: 8000,
       summary: 5000,
+      influencer: 12000,
     };
 
     let estimate = baseEstimates[agentId] || 6000;
