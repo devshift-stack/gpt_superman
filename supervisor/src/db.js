@@ -209,7 +209,9 @@ class DB {
     params.push(limit, offset);
 
     const rows = this.db.prepare(sql).all(...params);
-    const total = this.db.prepare(`SELECT COUNT(*) as cnt FROM tasks${status ? ' WHERE status = ?' : ''}`).get(status || undefined);
+    const total = status
+      ? this.db.prepare(`SELECT COUNT(*) as cnt FROM tasks WHERE status = ?`).get(status)
+      : this.db.prepare(`SELECT COUNT(*) as cnt FROM tasks`).get();
 
     return {
       tasks: rows.map(row => this._mapTaskRow(row)),
