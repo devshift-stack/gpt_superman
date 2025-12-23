@@ -1,86 +1,106 @@
 /**
- * Agents API Routes v2 - Mit Arena Pro+ und Auto-Routing
+ * Agents API Routes v2.1 - Mit neuen spezialisierten Agents
  */
 
 const express = require('express');
-const { ResearchAgent, CodingAgent, CreativeAgent, AnalysisAgent, RecruiterAgent, SalesAgent } = require('../../supervisor/agents');
+const {
+  TranslatorAgent,
+  SupportAgent,
+  MarketingAgent,
+  DataAgent,
+  FinanceAgent,
+  LegalAgent,
+  SummaryAgent
+} = require('../agents');
 const ArenaProPlus = require('../../supervisor/ArenaProPlus');
 const TaskRouter = require('../../supervisor/TaskRouter');
 const { getAvailableProviders } = require('../../supervisor/src/providers');
 
-// Agent configurations
+// Agent configurations v2.1
 const AGENT_CONFIGS = {
-  research: {
-    id: 'research',
-    name: 'Research Agent',
-    type: 'research',
-    description: 'Sammelt Informationen, fasst Texte zusammen, erstellt Markt-Überblicke.',
-    capabilities: ['web_search', 'fact_check', 'summarize', 'compare', 'explain', 'timeline'],
-    keywords: ['search', 'find', 'research', 'summarize', 'compare', 'suche', 'finde'],
-    primary: { provider: 'gemini', model: 'gemini-1.5-pro' },
+  translator: {
+    id: 'translator',
+    name: 'Translator Agent',
+    type: 'translator',
+    description: 'Übersetzt Texte in 18 Sprachen mit Glossar-Support und Confidence Scores.',
+    capabilities: ['translate', 'detect_language', 'glossary', 'rtl_support'],
+    keywords: ['übersetze', 'translate', 'übersetzung', 'translation', 'sprache', 'language', 'englisch', 'deutsch', 'französisch'],
+    primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
     fallback: { provider: 'openai', model: 'gpt-4o' },
     settings: { timeout: 60000 },
-    costs: { input: 1.25, output: 5.00 }
+    costs: { input: 3.00, output: 15.00 }
   },
-  coding: {
-    id: 'coding',
-    name: 'Coding Agent',
-    type: 'coding',
-    description: 'Hilft bei Code, Debugging, Refactoring und technischen Aufgaben.',
-    capabilities: ['bug_fix', 'new_code', 'refactor', 'review', 'test', 'docs'],
-    keywords: ['code', 'bug', 'fix', 'function', 'class', 'implement', 'debug'],
-    primary: { provider: 'anthropic', model: 'claude-3-sonnet' },
+  support: {
+    id: 'support',
+    name: 'Support Agent',
+    type: 'support',
+    description: 'Kundenservice mit FAQ-Suche, Session-Management und Eskalationslogik.',
+    capabilities: ['faq_search', 'session_management', 'sentiment_tracking', 'escalation'],
+    keywords: ['hilfe', 'help', 'support', 'problem', 'frage', 'question', 'kundenservice', 'ticket'],
+    primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+    fallback: { provider: 'openai', model: 'gpt-4o' },
+    settings: { timeout: 60000 },
+    costs: { input: 3.00, output: 15.00 }
+  },
+  marketing: {
+    id: 'marketing',
+    name: 'Marketing Agent',
+    type: 'marketing',
+    description: 'Marketing mit A/B Testing und Statistical Significance.',
+    capabilities: ['ab_testing', 'campaign_analysis', 'copywriting', 'audience_targeting'],
+    keywords: ['marketing', 'kampagne', 'campaign', 'werbung', 'ad', 'copy', 'headline', 'ab test', 'conversion'],
+    primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+    fallback: { provider: 'openai', model: 'gpt-4o' },
+    settings: { timeout: 60000 },
+    costs: { input: 3.00, output: 15.00 }
+  },
+  data: {
+    id: 'data',
+    name: 'Data Agent',
+    type: 'data',
+    description: 'Datenanalyse mit SQL-Generierung und Chart-Empfehlungen.',
+    capabilities: ['sql_generation', 'chart_recommendation', 'data_analysis', 'multi_db'],
+    keywords: ['daten', 'data', 'sql', 'query', 'analyse', 'analysis', 'chart', 'database', 'tabelle'],
+    primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
     fallback: { provider: 'openai', model: 'gpt-4o' },
     settings: { timeout: 90000 },
     costs: { input: 3.00, output: 15.00 }
   },
-  creative: {
-    id: 'creative',
-    name: 'Creative Agent',
-    type: 'creative',
-    description: 'Erstellt Texte, Marketing-Copy, E-Mails und kreative Inhalte.',
-    capabilities: ['blog', 'marketing', 'email', 'social', 'story', 'headline'],
-    keywords: ['write', 'create', 'blog', 'email', 'marketing', 'headline', 'schreib'],
-    primary: { provider: 'openai', model: 'gpt-4o' },
-    fallback: { provider: 'anthropic', model: 'claude-3-sonnet' },
+  finance: {
+    id: 'finance',
+    name: 'Finance Agent',
+    type: 'finance',
+    description: 'Finanzen mit Multi-Währung (EUR, BAM, RSD, CHF) und Steuerberechnung.',
+    capabilities: ['multi_currency', 'tax_calculation', 'financial_analysis', 'budgeting'],
+    keywords: ['finanzen', 'finance', 'geld', 'money', 'steuer', 'tax', 'mwst', 'währung', 'currency', 'budget', 'rechnung'],
+    primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+    fallback: { provider: 'openai', model: 'gpt-4o' },
     settings: { timeout: 60000 },
-    costs: { input: 2.50, output: 10.00 }
+    costs: { input: 3.00, output: 15.00 }
   },
-  analysis: {
-    id: 'analysis',
-    name: 'Analysis Agent',
-    type: 'analysis',
-    description: 'Analysiert Daten, erkennt Trends und erstellt Business Intelligence.',
-    capabilities: ['data_analysis', 'trend', 'sentiment', 'comparison', 'forecast', 'report', 'kpi'],
-    keywords: ['analyze', 'data', 'trend', 'report', 'kpi', 'forecast', 'analysiere'],
-    primary: { provider: 'xai', model: 'grok-2' },
-    fallback: { provider: 'gemini', model: 'gemini-1.5-pro' },
+  legal: {
+    id: 'legal',
+    name: 'Legal Agent',
+    type: 'legal',
+    description: 'Recht mit Multi-Jurisdiktion (DE, AT, CH, BA, RS, HR).',
+    capabilities: ['contract_analysis', 'compliance_check', 'multi_jurisdiction', 'gdpr'],
+    keywords: ['recht', 'legal', 'vertrag', 'contract', 'gesetz', 'law', 'dsgvo', 'gdpr', 'compliance', 'agb'],
+    primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+    fallback: { provider: 'openai', model: 'gpt-4o' },
     settings: { timeout: 60000 },
-    costs: { input: 2.00, output: 10.00 }
+    costs: { input: 3.00, output: 15.00 }
   },
-  recruiter: {
-    id: 'recruiter',
-    name: 'Recruiter Agent',
-    type: 'recruiter',
-    description: 'HR-Spezialist für Recruiting, Stellenanzeigen, Interviews und Onboarding.',
-    capabilities: ['job_posting', 'candidate_screening', 'interview_prep', 'talent_search', 'onboarding', 'employer_branding'],
-    keywords: ['job', 'stelle', 'kandidat', 'bewerber', 'interview', 'recruiting', 'hr', 'personal', 'talent'],
-    primary: { provider: 'openai', model: 'gpt-4o' },
-    fallback: { provider: 'anthropic', model: 'claude-3-sonnet' },
+  summary: {
+    id: 'summary',
+    name: 'Summary Agent',
+    type: 'summary',
+    description: 'Zusammenfassungen in verschiedenen Styles (Executive, Bullets, Academic).',
+    capabilities: ['executive_summary', 'bullet_points', 'academic_summary', 'compression_analysis'],
+    keywords: ['zusammenfassung', 'summary', 'fasse zusammen', 'summarize', 'kurzfassung', 'überblick', 'overview'],
+    primary: { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022' },
+    fallback: { provider: 'openai', model: 'gpt-4o' },
     settings: { timeout: 60000 },
-    costs: { input: 2.50, output: 10.00 }
-  },
-  sales: {
-    id: 'sales',
-    name: 'Sales Agent',
-    type: 'sales',
-    description: 'Vertriebsexperte für Pitches, Einwandbehandlung, Closing und Lead-Qualifizierung.',
-    capabilities: ['cold_outreach', 'sales_pitch', 'objection_handling', 'follow_up', 'closing', 'lead_qualification', 'negotiation', 'proposal'],
-    keywords: ['sales', 'vertrieb', 'pitch', 'deal', 'closing', 'lead', 'kunde', 'akquise', 'angebot'],
-    primary: { provider: 'openai', model: 'gpt-4o' },
-    fallback: { provider: 'xai', model: 'grok-2' },
-    settings: { timeout: 60000 },
-    costs: { input: 2.50, output: 10.00 }
+    costs: { input: 3.00, output: 15.00 }
   }
 };
 
@@ -93,15 +113,16 @@ let initialized = false;
 async function initializeAgents() {
   if (initialized) return;
 
-  console.log('[agents] Initializing OOP agents...');
+  console.log('[agents] Initializing v2.1 agents...');
 
   const AgentClasses = {
-    research: ResearchAgent,
-    coding: CodingAgent,
-    creative: CreativeAgent,
-    analysis: AnalysisAgent,
-    recruiter: RecruiterAgent,
-    sales: SalesAgent
+    translator: TranslatorAgent,
+    support: SupportAgent,
+    marketing: MarketingAgent,
+    data: DataAgent,
+    finance: FinanceAgent,
+    legal: LegalAgent,
+    summary: SummaryAgent
   };
 
   for (const [type, config] of Object.entries(AGENT_CONFIGS)) {
@@ -124,7 +145,7 @@ async function initializeAgents() {
   console.log('[agents] Arena Pro+ initialized');
 
   initialized = true;
-  console.log('[agents] All systems ready (' + Object.keys(agents).length + ' agents)');
+  console.log('[agents] All systems ready (' + Object.keys(agents).length + ' agents v2.1)');
 }
 
 function createAgentsRouter() {
@@ -159,6 +180,29 @@ function createAgentsRouter() {
       return res.status(404).json({ ok: false, error: 'Agent not found' });
     }
     res.json({ ok: true, ...agent.getHealth() });
+  });
+
+  // Get agent health status
+  router.get('/agents/:id/health', async (req, res) => {
+    const agent = agents[req.params.id];
+    if (!agent) {
+      return res.status(404).json({ ok: false, error: 'Agent not found' });
+    }
+    res.json({ ok: true, ...agent.getHealth() });
+  });
+
+  // Reset agent circuit breaker
+  router.post('/agents/:id/reset', async (req, res) => {
+    const agent = agents[req.params.id];
+    if (!agent) {
+      return res.status(404).json({ ok: false, error: 'Agent not found' });
+    }
+    try {
+      agent.resetCircuitBreaker();
+      res.json({ ok: true, message: 'Circuit breaker reset', agentId: req.params.id });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
   });
 
   // Execute task on specific agent
@@ -245,6 +289,37 @@ function createAgentsRouter() {
   });
 
   // ============================================
+  // BATCH PROCESSING
+  // ============================================
+
+  router.post('/batch', async (req, res) => {
+    const { tasks } = req.body;
+    if (!tasks || !Array.isArray(tasks)) {
+      return res.status(400).json({ ok: false, error: 'Tasks array is required' });
+    }
+
+    try {
+      const results = [];
+      for (const task of tasks) {
+        const agent = agents[task.agent];
+        if (!agent) {
+          results.push({ task: task.task, status: 'error', error: 'Agent not found: ' + task.agent });
+          continue;
+        }
+        try {
+          const result = await agent.execute({ content: task.task, type: task.agent });
+          results.push({ task: task.task, agent: task.agent, status: 'success', result });
+        } catch (error) {
+          results.push({ task: task.task, agent: task.agent, status: 'error', error: error.message });
+        }
+      }
+      res.json({ ok: true, results });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
+    }
+  });
+
+  // ============================================
   // ARENA PRO+ ENDPOINTS
   // ============================================
 
@@ -285,7 +360,7 @@ function createAgentsRouter() {
     res.json({
       ok: true,
       configured: getAvailableProviders(),
-      available: ['openai', 'anthropic', 'xai', 'gemini', 'cursor']
+      available: ['openai', 'anthropic', 'xai', 'gemini']
     });
   });
 
@@ -294,18 +369,23 @@ function createAgentsRouter() {
     res.json({
       ok: true,
       system: 'MUCI-SUPERMAN',
-      version: '2.0',
+      version: '2.1',
       features: {
         agents: Object.keys(agents).length,
         autoRouting: true,
         arenaProPlus: true,
+        batchProcessing: true,
+        streaming: true,
       },
       agents: Object.keys(agents),
       endpoints: {
         agents: '/api/v1/agents',
         execute: '/api/v1/agents/:id/execute',
+        health: '/api/v1/agents/:id/health',
+        reset: '/api/v1/agents/:id/reset',
         auto: '/api/v1/auto',
         arena: '/api/v1/arena',
+        batch: '/api/v1/batch',
         analyze: '/api/v1/analyze',
       }
     });

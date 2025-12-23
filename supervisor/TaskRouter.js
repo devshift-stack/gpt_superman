@@ -1,5 +1,5 @@
 /**
- * TaskRouter - Intelligentes Task-Routing zu Agenten
+ * TaskRouter v2.1 - Intelligentes Task-Routing zu Agenten
  *
  * Entscheidungslogik:
  * 1. Expliziter Task-Typ prüfen
@@ -12,103 +12,138 @@ class TaskRouter {
   constructor(agents, config = {}) {
     this.agents = agents; // Map of agent instances
     this.config = {
-      defaultAgent: config.defaultAgent || 'creative',
+      defaultAgent: config.defaultAgent || 'summary',
       matchThreshold: config.matchThreshold || 0.3,
       ...config,
     };
 
-    // Keyword-Mappings für jeden Agent
+    // Keyword-Mappings für v2.1 Agents
     this.keywordMappings = {
-      research: {
+      translator: {
         keywords: [
-          'recherche', 'suche', 'finde', 'information', 'fakten', 'erklär',
-          'was ist', 'wer ist', 'wie funktioniert', 'warum', 'definition',
-          'search', 'find', 'research', 'explain', 'what is', 'how does',
-          'zusammenfass', 'summarize', 'vergleich', 'compare', 'unterschied',
-          'hintergrund', 'kontext', 'quelle', 'source', 'wiki', 'google',
+          'übersetze', 'translate', 'übersetzung', 'translation',
+          'sprache', 'language', 'englisch', 'english', 'deutsch', 'german',
+          'französisch', 'french', 'spanisch', 'spanish', 'italienisch', 'italian',
+          'russisch', 'russian', 'arabisch', 'arabic', 'chinesisch', 'chinese',
+          'japanisch', 'japanese', 'koreanisch', 'korean', 'türkisch', 'turkish',
+          'polnisch', 'polish', 'niederländisch', 'dutch', 'portugiesisch', 'portuguese',
+          'bosnisch', 'bosnian', 'serbisch', 'serbian', 'kroatisch', 'croatian',
+          'in english', 'auf deutsch', 'ins deutsche', 'into english',
         ],
-        weight: 1.0,
+        weight: 1.3,
       },
-      coding: {
+      support: {
         keywords: [
-          'code', 'programmier', 'funktion', 'klasse', 'bug', 'fehler', 'fix',
-          'javascript', 'python', 'typescript', 'react', 'node', 'api',
-          'algorithm', 'debug', 'refactor', 'test', 'unit test', 'implement',
-          'schreib code', 'erstelle funktion', 'entwickle', 'script',
-          'json', 'html', 'css', 'sql', 'database', 'backend', 'frontend',
-          'git', 'deploy', 'docker', 'kubernetes', 'server', 'error',
-        ],
-        weight: 1.2, // Slightly higher weight for precise matches
-      },
-      creative: {
-        keywords: [
-          'schreib', 'text', 'artikel', 'blog', 'story', 'geschichte',
-          'marketing', 'werbung', 'slogan', 'headline', 'überschrift',
-          'email', 'e-mail', 'newsletter', 'social media', 'post', 'tweet',
-          'kreativ', 'idee', 'brainstorm', 'content', 'copy', 'copywriting',
-          'beschreibung', 'description', 'produkttext', 'about', 'bio',
-          'write', 'create', 'compose', 'draft', 'formulier',
-        ],
-        weight: 1.0,
-      },
-      analysis: {
-        keywords: [
-          'analyse', 'analysier', 'daten', 'data', 'statistik', 'trend',
-          'chart', 'graph', 'report', 'bericht', 'kpi', 'metrik', 'metric',
-          'prognose', 'forecast', 'vorhersage', 'sentiment', 'bewert',
-          'evaluate', 'assess', 'measure', 'benchmark', 'comparison',
-          'excel', 'tabelle', 'zahlen', 'number', 'prozent', 'wachstum',
-          'umsatz', 'revenue', 'kosten', 'cost', 'roi', 'performance',
-        ],
-        weight: 1.0,
-      },
-      recruiter: {
-        keywords: [
-          'stelle', 'job', 'position', 'stellenanzeige', 'jobanzeige',
-          'kandidat', 'bewerber', 'bewerbung', 'cv', 'lebenslauf', 'resume',
-          'interview', 'vorstellungsgespräch', 'fragen', 'screening',
-          'talent', 'recruiting', 'hr', 'personal', 'einstellung', 'hire',
-          'onboarding', 'einarbeitung', 'employer branding', 'karriere',
-          'gehalt', 'salary', 'benefits', 'team', 'kultur', 'culture',
+          'hilfe', 'help', 'support', 'problem', 'fehler', 'error',
+          'frage', 'question', 'wie kann ich', 'how do i', 'how can i',
+          'funktioniert nicht', 'not working', 'kaputt', 'broken',
+          'kundenservice', 'customer service', 'ticket', 'anfrage',
+          'beschwerde', 'complaint', 'reklamation', 'rückgabe', 'return',
+          'passwort', 'password', 'zugang', 'access', 'login', 'konto', 'account',
         ],
         weight: 1.1,
       },
-      sales: {
+      marketing: {
         keywords: [
-          'verkauf', 'vertrieb', 'sales', 'deal', 'kunde', 'customer',
-          'pitch', 'präsentation', 'angebot', 'proposal', 'quote',
-          'einwand', 'objection', 'preis', 'price', 'rabatt', 'discount',
-          'closing', 'abschluss', 'lead', 'prospect', 'akquise', 'cold',
-          'follow-up', 'nachfassen', 'verhandlung', 'negotiation',
-          'crm', 'pipeline', 'conversion', 'upsell', 'cross-sell',
+          'marketing', 'werbung', 'advertising', 'kampagne', 'campaign',
+          'zielgruppe', 'target audience', 'conversion', 'click', 'ctr',
+          'a/b test', 'ab test', 'split test', 'variante', 'variant',
+          'headline', 'überschrift', 'slogan', 'tagline', 'copy',
+          'social media', 'facebook', 'instagram', 'linkedin', 'twitter',
+          'newsletter', 'email marketing', 'landing page', 'funnel',
+          'roi', 'reach', 'impression', 'engagement', 'viral',
         ],
         weight: 1.1,
+      },
+      data: {
+        keywords: [
+          'daten', 'data', 'analyse', 'analysis', 'analysiere', 'analyze',
+          'sql', 'query', 'abfrage', 'database', 'datenbank',
+          'mysql', 'postgresql', 'sqlite', 'oracle', 'mssql',
+          'tabelle', 'table', 'spalte', 'column', 'zeile', 'row',
+          'chart', 'diagramm', 'graph', 'visualisierung', 'visualization',
+          'report', 'bericht', 'dashboard', 'kpi', 'metrik', 'metric',
+          'statistik', 'statistics', 'durchschnitt', 'average', 'summe', 'sum',
+        ],
+        weight: 1.2,
+      },
+      finance: {
+        keywords: [
+          'finanzen', 'finance', 'geld', 'money', 'betrag', 'amount',
+          'steuer', 'tax', 'mwst', 'vat', 'mehrwertsteuer', 'pdv',
+          'währung', 'currency', 'euro', 'eur', 'dollar', 'usd', 'chf', 'bam', 'rsd',
+          'rechnung', 'invoice', 'berechne', 'calculate', 'kalkulation',
+          'budget', 'kosten', 'cost', 'preis', 'price', 'gewinn', 'profit',
+          'verlust', 'loss', 'bilanz', 'balance', 'umsatz', 'revenue',
+          'zinsen', 'interest', 'kredit', 'loan', 'investition', 'investment',
+        ],
+        weight: 1.2,
+      },
+      legal: {
+        keywords: [
+          'recht', 'legal', 'gesetz', 'law', 'paragraph', 'artikel', 'article',
+          'vertrag', 'contract', 'vereinbarung', 'agreement', 'klausel', 'clause',
+          'dsgvo', 'gdpr', 'datenschutz', 'privacy', 'compliance',
+          'agb', 'terms', 'bedingungen', 'conditions', 'nutzungsbedingungen',
+          'haftung', 'liability', 'gewährleistung', 'warranty', 'garantie',
+          'anwalt', 'lawyer', 'gericht', 'court', 'klage', 'lawsuit',
+          'impressum', 'imprint', 'widerruf', 'revocation', 'kündigung',
+        ],
+        weight: 1.2,
+      },
+      summary: {
+        keywords: [
+          'zusammenfassung', 'summary', 'zusammenfassen', 'summarize',
+          'fasse zusammen', 'kurz', 'brief', 'überblick', 'overview',
+          'kernpunkte', 'key points', 'highlights', 'wichtigste', 'main',
+          'executive', 'bullets', 'stichpunkte', 'bullet points',
+          'tldr', 'tl;dr', 'kurzfassung', 'abstract', 'synopsis',
+          'komprimier', 'compress', 'kürze', 'shorten', 'reduziere', 'reduce',
+        ],
+        weight: 1.0,
       },
     };
 
-    // Type-to-Agent Mapping
+    // Type-to-Agent Mapping für v2.1
     this.typeMapping = {
-      'research': 'research',
-      'recherche': 'research',
-      'suche': 'research',
-      'coding': 'coding',
-      'code': 'coding',
-      'entwicklung': 'coding',
-      'creative': 'creative',
-      'kreativ': 'creative',
-      'content': 'creative',
-      'text': 'creative',
-      'analysis': 'analysis',
-      'analyse': 'analysis',
-      'data': 'analysis',
-      'daten': 'analysis',
-      'recruiter': 'recruiter',
-      'recruiting': 'recruiter',
-      'hr': 'recruiter',
-      'personal': 'recruiter',
-      'sales': 'sales',
-      'vertrieb': 'sales',
-      'verkauf': 'sales',
+      // Translator
+      'translator': 'translator',
+      'translation': 'translator',
+      'übersetze': 'translator',
+      'übersetzung': 'translator',
+      'translate': 'translator',
+      // Support
+      'support': 'support',
+      'hilfe': 'support',
+      'help': 'support',
+      'customer': 'support',
+      // Marketing
+      'marketing': 'marketing',
+      'werbung': 'marketing',
+      'campaign': 'marketing',
+      'kampagne': 'marketing',
+      // Data
+      'data': 'data',
+      'daten': 'data',
+      'sql': 'data',
+      'analyse': 'data',
+      'analysis': 'data',
+      // Finance
+      'finance': 'finance',
+      'finanzen': 'finance',
+      'steuer': 'finance',
+      'tax': 'finance',
+      'rechnung': 'finance',
+      // Legal
+      'legal': 'legal',
+      'recht': 'legal',
+      'vertrag': 'legal',
+      'contract': 'legal',
+      'compliance': 'legal',
+      // Summary
+      'summary': 'summary',
+      'zusammenfassung': 'summary',
+      'summarize': 'summary',
     };
 
     // Routing Statistics
@@ -275,17 +310,18 @@ class TaskRouter {
    * Schätzt die Bearbeitungszeit
    */
   estimateTime(agentId, task) {
-    // Base estimates in ms
+    // Base estimates in ms für v2.1 Agents
     const baseEstimates = {
-      research: 8000,
-      coding: 12000,
-      creative: 6000,
-      analysis: 10000,
-      recruiter: 8000,
-      sales: 6000,
+      translator: 5000,
+      support: 6000,
+      marketing: 8000,
+      data: 10000,
+      finance: 6000,
+      legal: 8000,
+      summary: 5000,
     };
 
-    let estimate = baseEstimates[agentId] || 8000;
+    let estimate = baseEstimates[agentId] || 6000;
 
     // Adjust by content length
     const content = task.content || task.message || '';
