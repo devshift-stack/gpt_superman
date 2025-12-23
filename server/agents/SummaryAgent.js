@@ -71,7 +71,7 @@ class SummaryAgent extends BaseAgent {
       keywords: [
         'zusammenfassung', 'summary', 'sažetak', 'zusammenfassen', 'summarize',
         'kernaussagen', 'key points', 'abstract', 'tldr', 'überblick',
-        'overview', 'pregled', 'stichpunkte', 'bullet points'
+        'overview', 'pregled', 'stichpunkte', 'bullet points', 'fasse', 'kürze'
       ],
       costs: { input: 3, output: 15 },
       feedback: { enabled: true, minSamples: 5 }

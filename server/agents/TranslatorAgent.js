@@ -84,8 +84,9 @@ class TranslatorAgent extends BaseAgent {
       keywords: [
         'übersetzen', 'translate', 'übersetzung', 'translation', 'sprache', 'language',
         'deutsch', 'englisch', 'französisch', 'bosnisch', 'serbisch', 'kroatisch',
-        'türkisch', 'arabisch', 'lokalisierung', 'localization',
-        'prevesti', 'prijevod', 'превод', 'tercüme', 'ترجمة', '翻译'
+        'türkisch', 'arabisch', 'lokalisierung', 'localization', 'auf englisch',
+        'prevesti', 'prijevod', 'превод', 'tercüme', 'ترجمة', '翻译', 'prevoditi',
+        'ins deutsche', 'auf deutsch', 'to english', 'na bosanski', 'na srpski'
       ],
       costs: { input: 3, output: 15 }
     });
