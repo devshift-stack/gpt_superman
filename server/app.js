@@ -8,7 +8,9 @@ const { createHealthRouter } = require("./routes/health");
 const { createSupervisorRouter } = require("./routes/supervisor");
 const { createAgentsRouter } = require("./routes/agents");
 const { createAuthRouter } = require("./routes/auth");
+const { createServicesRouter } = require("./routes/services");
 const { authMiddleware, optionalAuth } = require("./middleware/auth");
+const { correlationMiddleware, errorMiddleware } = require("./services/error-logger");
 
 function createApp({ supervisor }) {
   const app = express();
@@ -36,6 +38,9 @@ function createApp({ supervisor }) {
 
   app.use(express.json({ limit: "2mb" }));
   app.use(morgan("combined"));
+
+  // Correlation ID für Request-Tracking
+  app.use(correlationMiddleware());
 
   // Global rate limiting (before auth)
   const maxReq = Number(process.env.RATE_LIMIT || 200);
@@ -72,16 +77,16 @@ function createApp({ supervisor }) {
   app.use(apiBase, createSupervisorRouter({ supervisor }));
   app.use(apiBase, createAgentsRouter());
 
+  // Services routes (Sipgate, Twilio, Voice, Meta Graph)
+  app.use(`${apiBase}/services`, createServicesRouter());
+
   // 404 handler
   app.use((_req, res) => {
     res.status(404).json({ error: "NOT_FOUND" });
   });
 
-  // Error handler
-  app.use((err, _req, res, _next) => {
-    console.error("[api_error]", err);
-    res.status(500).json({ error: "INTERNAL_ERROR", message: err.message || "Internal error" });
-  });
+  // Error handler (mit Correlation-ID und strukturiertem Logging)
+  app.use(errorMiddleware);
 
   return app;
 }
